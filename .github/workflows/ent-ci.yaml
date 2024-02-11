@@ -1,0 +1,19 @@
+name: EntCI
+on:
+  push:
+    # Run whenever code is changed in the master.
+    branches:
+      - master
+  # Run on PRs where something changed under the `ent/` directory.
+  pull_request:
+    paths:
+      - "ent/*"
+jobs:
+  ent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+      - uses: ent/contrib/ci@master
