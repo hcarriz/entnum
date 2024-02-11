@@ -28,7 +28,6 @@ var (
 
 			return string(r)
 		},
-		"lower": strings.ToLower,
 		"isEnum": func(in *gen.Field) bool {
 			return in != nil && in.Type.Type == field.TypeEnum
 

@@ -3,15 +3,26 @@
         {{ template "header" . }}
 {{- end }}
 
+import (
+{{- range $node := .Nodes }}
+    {{- range $fields := $node.Fields }}
+        {{if eq (isEnum $fields) true }}
+            "{{$node.Config.Package}}/{{$node.PackageDir}}"
+        {{- end }}
+    {{- end }}
+{{- end }}
+)
+
+
 {{- range $node := .Nodes }}
     {{- range $fields := $node.Fields }}
         {{if eq (isEnum $fields) true }}
 
-        // All{{$node.Name}}{{title $fields.Name}} will return all of {{lower $node.Name}}'s {{$fields.Name}} values.
-        func All{{$node.Name}}{{title $fields.Name}}() []{{lower $node.Name}}.{{title $fields.Name}} {
-            return []{{lower $node.Name}}.{{title $fields.Name}} {
+        // All{{$node.Name}}{{title $fields.Name}} will return all of {{$node.Package}}'s {{$fields.Name}} values.
+        func All{{$node.Name}}{{title $fields.Name}}() []{{$node.Package}}.{{title $fields.Name}} {
+            return []{{$node.Package}}.{{title $fields.Name}} {
                 {{- range $enum := $fields.Enums }}
-                    {{lower $node.Name}}.{{$enum.Name}},
+                    {{$node.Package}}.{{$enum.Name}},
                 {{- end }}
             }
         }
