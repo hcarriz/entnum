@@ -17,6 +17,15 @@ func AllTodoStatus() []todo.Status {
     }
 }
 
+// AllTodoPriorityLevel will return all of todo's priority_level values.
+func AllTodoPriorityLevel() []todo.PriorityLevel {
+    return []todo.PriorityLevel{
+        todo.PriorityLevelLow,
+        todo.PriorityLevelMid,
+        todo.PriorityLevelHigh,
+    }
+}
+
 ---
 
 [TestEntc/custom_verb - 1]
@@ -34,6 +43,15 @@ func ReturnTodoStatus() []todo.Status {
         todo.StatusOngoing,
         todo.StatusCompleted,
         todo.StatusLater,
+    }
+}
+
+// ReturnTodoPriorityLevel will return all of todo's priority_level values.
+func ReturnTodoPriorityLevel() []todo.PriorityLevel {
+    return []todo.PriorityLevel{
+        todo.PriorityLevelLow,
+        todo.PriorityLevelMid,
+        todo.PriorityLevelHigh,
     }
 }
 

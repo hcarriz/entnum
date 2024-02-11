@@ -6,13 +6,9 @@
 {{- end }}
 
 import (
-{{- range $node := .Nodes }}
-    {{- range $fields := $node.Fields }}
-        {{if eq (isEnum $fields) true }}
-            "{{$node.Config.Package}}/{{$node.PackageDir}}"
-        {{- end }}
+    {{- range $ext := ( packagesFromFields .Nodes  ) }}
+        "{{$ext}}"
     {{- end }}
-{{- end }}
 )
 
 
@@ -26,9 +22,9 @@ import (
             {{ $verb = $n.Verb }}
         {{- end }}
 
-        // {{$verb}}{{$node.Name}}{{title $fields.Name}} will return all of {{$node.Package}}'s {{$fields.Name}} values.
-        func {{$verb}}{{$node.Name}}{{title $fields.Name}}() []{{$node.Package}}.{{title $fields.Name}} {
-            return []{{$node.Package}}.{{title $fields.Name}} {
+        // {{$verb}}{{$node.Name}}{{$fields.StructField}} will return all of {{$node.Package}}'s {{$fields.Name}} values.
+        func {{$verb}}{{$node.Name}}{{$fields.StructField}}() []{{$fields.Type}} {
+            return []{{$fields.Type}} {
                 {{- range $enum := $fields.Enums }}
                     {{$node.Package}}.{{$enum.Name}},
                 {{- end }}

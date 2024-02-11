@@ -19,8 +19,9 @@ var (
 
 	// TemplateFuncs holds the functions that are being used by entnum during generation.
 	TemplateFuncs = template.FuncMap{
-		"title":  title,
-		"isEnum": isEnum,
+		"title":              title,
+		"isEnum":             isEnum,
+		"packagesFromFields": packagesFromField,
 	}
 )
 

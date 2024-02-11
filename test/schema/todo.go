@@ -14,6 +14,7 @@ type Todo struct {
 func (Todo) Fields() []ent.Field {
 	return []ent.Field{
 		field.Enum("status").Values("ongoing", "completed", "later"),
+		field.Enum("priority_level").Values("low", "mid", "high"),
 		field.String("task"),
 	}
 }

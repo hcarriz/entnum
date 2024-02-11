@@ -1,6 +1,7 @@
 package entnum
 
 import (
+	"path/filepath"
 	"strings"
 	"unicode"
 
@@ -21,4 +22,22 @@ func title(in string) string {
 
 func isEnum(in *gen.Field) bool {
 	return in != nil && in.Type != nil && in.Type.Type == field.TypeEnum
+}
+
+func packagesFromField(fields []*gen.Type) []string {
+
+	list := []string{}
+
+	for _, f := range fields {
+		if f.Config != nil {
+
+			for _, x := range f.Fields {
+				if x.Type != nil && x.Type.Type == field.TypeEnum {
+					list = append(list, filepath.Join(f.Config.Package, f.PackageDir()))
+				}
+			}
+		}
+	}
+
+	return list
 }
