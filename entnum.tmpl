@@ -1,3 +1,5 @@
+{{ define "entnum" }}
+
 {{ $pkg := base $.Config.Package }}
 {{- with extend $ "Package" $pkg }}
         {{ template "header" . }}
@@ -18,8 +20,14 @@ import (
     {{- range $fields := $node.Fields }}
         {{if eq (isEnum $fields) true }}
 
-        // All{{$node.Name}}{{title $fields.Name}} will return all of {{$node.Package}}'s {{$fields.Name}} values.
-        func All{{$node.Name}}{{title $fields.Name}}() []{{$node.Package}}.{{title $fields.Name}} {
+        {{ $verb := "All" }}
+
+        {{ if $n := $node.Config.Annotations.EntnumVerb }}
+            {{ $verb = $n.Verb }}
+        {{- end }}
+
+        // {{$verb}}{{$node.Name}}{{title $fields.Name}} will return all of {{$node.Package}}'s {{$fields.Name}} values.
+        func {{$verb}}{{$node.Name}}{{title $fields.Name}}() []{{$node.Package}}.{{title $fields.Name}} {
             return []{{$node.Package}}.{{title $fields.Name}} {
                 {{- range $enum := $fields.Enums }}
                     {{$node.Package}}.{{$enum.Name}},
@@ -29,3 +37,5 @@ import (
         {{- end }}
     {{- end }}
 {{- end }}
+
+{{- end}}

@@ -3,56 +3,78 @@ package entnum
 import (
 	"embed"
 	"errors"
-	"strings"
 	"text/template"
 	"unicode"
 
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
-	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema"
 )
 
 var (
 	_ entc.Extension = (*Extension)(nil)
 
-	//go:embed entnum
-	templates     embed.FS
+	//go:embed entnum.tmpl
+	templates embed.FS
+
+	// TemplateFuncs holds the functions that are being used by entnum during generation.
 	TemplateFuncs = template.FuncMap{
-		"title": func(in string) string {
-
-			r := []rune(strings.ToLower(in))
-
-			if len(r) > 0 {
-				r[0] = unicode.ToUpper(r[0])
-			}
-
-			return string(r)
-		},
-		"isEnum": func(in *gen.Field) bool {
-			return in != nil && in.Type.Type == field.TypeEnum
-
-		},
+		"title":  title,
+		"isEnum": isEnum,
 	}
 )
 
 type Extension struct {
+	name string
 	entc.DefaultExtension
 }
 
-// type option func(*Extension) error
+type option func(*Extension) error
 
-// func (o option) apply(c *Extension) error {
-// 	return o(c)
-// }
+func (o option) apply(c *Extension) error {
+	return o(c)
+}
 
 // Option for future use.
 type Option interface {
 	apply(*Extension) error
 }
 
+type Retrieve struct {
+	Verb string
+}
+
+func (r Retrieve) Name() string {
+	return "EntnumVerb"
+}
+
+var _ schema.Annotation = (*Retrieve)(nil)
+
+func Name(name string) Option {
+	return option(func(e *Extension) error {
+
+		if name == "" {
+			return errors.New("entnum.Name() is missing a name")
+		}
+
+		if !unicode.IsLetter([]rune(name)[0]) {
+			return errors.New("entnum.Name() required can only start with a letter")
+		}
+
+		e.name = title(name)
+		return nil
+	})
+}
+
+func (e *Extension) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		Retrieve{Verb: e.name},
+	}
+}
+
 func (e *Extension) Templates() []*gen.Template {
 	return []*gen.Template{
-		gen.MustParse(gen.NewTemplate("entnum").Funcs(TemplateFuncs).ParseFS(templates, "entnum")),
+		gen.MustParse(gen.NewTemplate("entnum").Funcs(TemplateFuncs).ParseFS(templates, "entnum.tmpl")),
 	}
 }
 
@@ -60,7 +82,9 @@ func (e *Extension) Templates() []*gen.Template {
 func New(opts ...Option) (*Extension, error) {
 
 	var (
-		e   = Extension{}
+		e = Extension{
+			name: "All",
+		}
 		err error
 	)
 

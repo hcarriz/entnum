@@ -14,43 +14,120 @@ import (
 
 func TestEntc(t *testing.T) {
 
-	t.Run("generate with entc", func(t *testing.T) {
+	type test struct {
+		name    string
+		args    []entnum.Option
+		wantErr bool
+	}
 
-		dir := t.TempDir()
+	tests := []test{
+		{
+			name:    "generate with entc",
+			args:    []entnum.Option{},
+			wantErr: false,
+		},
+		{
+			name: "custom verb",
+			args: []entnum.Option{
+				entnum.Name("return"),
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing verb",
+			args: []entnum.Option{
+				entnum.Name(""),
+			},
+			wantErr: true,
+		},
+		{
+			name: "verb that starts with number",
+			args: []entnum.Option{
+				entnum.Name("4you"),
+			},
+			wantErr: true,
+		},
+		{
+			name: "verb that starts with punctuation",
+			args: []entnum.Option{
+				entnum.Name("!you"),
+			},
+			wantErr: true,
+		},
+	}
 
-		pkg := "ent"
-		sch := "schema"
-		result := "entnum.go"
-		schmaPath := "./test/schema"
+	for _, tt := range tests {
 
-		config := &gen.Config{
-			Target:  filepath.Join(dir, pkg),
-			Package: pkg,
-			Schema:  sch,
-		}
+		t.Run(tt.name, func(t *testing.T) {
 
-		en, err := entnum.New()
-		if err != nil {
-			t.Fatalf("unable to start entenum: %v", err)
-		}
+			dir := t.TempDir()
 
-		opts := []entc.Option{
-			entc.Extensions(en),
-		}
+			pkg := "ent"
+			sch := "schema"
+			result := "entnum.go"
+			schmaPath := "./test/schema"
 
-		if err := entc.Generate(schmaPath, config, opts...); err != nil {
-			t.Fatalf("running ent codegen: %v", err)
-		}
+			config := &gen.Config{
+				Target:  filepath.Join(dir, pkg),
+				Package: pkg,
+				Schema:  sch,
+			}
 
-		f := os.DirFS(dir)
+			got, err := entnum.New(tt.args...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if err != nil && tt.wantErr {
+				return
+			}
 
-		data, err := fs.ReadFile(f, filepath.Join(pkg, result))
-		if err != nil {
-			t.Errorf("unable to open directory: %v", err)
-		}
+			opts := []entc.Option{
+				entc.Extensions(got),
+			}
 
-		snaps.MatchSnapshot(t, string(data))
+			if err := entc.Generate(schmaPath, config, opts...); err != nil {
+				t.Fatalf("running ent codegen: %v", err)
+				return
+			}
 
-	})
+			f := os.DirFS(dir)
+
+			data, err := fs.ReadFile(f, filepath.Join(pkg, result))
+			if err != nil {
+				t.Errorf("unable to open directory: %v", err)
+				return
+			}
+
+			snaps.MatchSnapshot(t, string(data))
+
+		})
+	}
 
 }
+
+// func TestNew(t *testing.T) {
+// 	type args struct {
+// 		opts []Option
+// 	}
+// 	tests := []struct {
+// 		name    string
+// 		args    args
+// 		want    *Extension
+// 		wantErr bool
+// 	}{
+// 		// TODO: Add test cases.
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			got, err := New(tt.args.opts...)
+// 			if (err != nil) != tt.wantErr {
+// 				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
+// 				return
+// 			}
+// 			if !reflect.DeepEqual(got, tt.want) {
+// 				t.Errorf("New() = %v, want %v", got, tt.want)
+// 			}
+// 		})
+// 	}
+// }
